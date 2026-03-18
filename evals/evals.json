@@ -1,0 +1,53 @@
+{
+  "skill_name": "chrome-browser-automation",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "用 Kimi 搜索今天的重要新闻",
+      "expected_output": "打开 Kimi，输入搜索问题，获取 AI 整理的新闻摘要",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "截图当前浏览器页面",
+      "expected_output": "返回当前页面的截图",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "查看 Chrome 浏览器状态",
+      "expected_output": "返回浏览器连接状态，包括 running、cdpReady 等信息",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "在 Kimi 上查一下 OpenClaw 的最新功能",
+      "expected_output": "打开 Kimi，搜索 OpenClaw 最新功能并返回结果",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "帮我查查这个 https://github.com/openclaw/openclaw 项目",
+      "expected_output": "打开指定的 GitHub 链接并展示项目信息",
+      "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "用 Gemini 搜索人工智能最新进展",
+      "expected_output": "打开 Gemini Web，搜索 AI 最新进展并返回结果",
+      "files": []
+    },
+    {
+      "id": 7,
+      "prompt": "看下我 Chrome 开了哪些标签页",
+      "expected_output": "列出当前 Chrome 所有打开的标签页",
+      "files": []
+    },
+    {
+      "id": 8,
+      "prompt": "打开飞书文档 https://my.feishu.cn/docx/xxx",
+      "expected_output": "打开指定的飞书文档链接",
+      "files": []
+    }
+  ]
+}

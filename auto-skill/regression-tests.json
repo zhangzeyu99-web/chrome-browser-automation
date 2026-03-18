@@ -1,0 +1,43 @@
+{
+  "skill_name": "chrome-browser-automation",
+  "test_suites": {
+    "smoke": {
+      "trigger": "on_save",
+      "description": "每次保存 SKILL.md 时运行的快速验证",
+      "evals": [3, 2, 7],
+      "timeout": "5m",
+      "blocking": true,
+      "alert_on_failure": true
+    },
+    "regression": {
+      "trigger": "on_release",
+      "description": "版本发布前的完整回归测试",
+      "evals": [1, 2, 3, 4, 5, 6, 7, 8],
+      "runs_per_eval": 3,
+      "timeout": "30m",
+      "blocking": true,
+      "require_approval": true
+    },
+    "performance": {
+      "trigger": "scheduled",
+      "description": "每周性能基线对比",
+      "schedule": "0 2 * * 1",
+      "evals": [1, 4, 6],
+      "runs_per_eval": 5,
+      "metrics": ["time", "tokens", "tool_calls"],
+      "baseline_comparison": true,
+      "alert_threshold": {
+        "time_degradation": "+20%",
+        "token_increase": "+30%",
+        "pass_rate_drop": "-0.10"
+      }
+    },
+    "compatibility": {
+      "trigger": "on_chrome_update",
+      "description": "Chrome 更新后的兼容性测试",
+      "evals": [1, 2, 3],
+      "timeout": "15m",
+      "blocking": false
+    }
+  }
+}
