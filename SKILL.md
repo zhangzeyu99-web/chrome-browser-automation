@@ -1,6 +1,6 @@
 ---
 name: chrome-browser-automation
-version: 1.2.0
+version: 1.3.0
 description: |
   使用 OpenClaw 的 Chrome Attach 模式自动化操作浏览器。
   
@@ -57,6 +57,35 @@ keywords:
 
 1. **Chrome 已安装** 并开启 Remote Debugging
 2. **OpenClaw Gateway 运行中** 且配置正确
+
+## 🚀 智能启动模式（推荐）
+
+通过 OpenCLI 自动检测并启动浏览器，无需手动配置：
+
+```javascript
+// 1. 使用 OpenCLI 自动检测并启动 Chrome
+exec("opencli doctor --live")
+
+// 2. 等待浏览器就绪
+Start-Sleep -Seconds 3
+
+// 3. 直接使用 browser 工具
+browser(action: "status", profile: "user")
+```
+
+**智能启动的优势**：
+- ✅ 自动检测 Chrome 安装位置
+- ✅ 自动启动 Remote Debugging 模式
+- ✅ 自动处理 SYSTEM 用户符号链接
+- ✅ 无需手动 PowerShell 脚本
+
+**工作原理**：
+1. `opencli doctor --live` 会检查系统环境，自动找到 Chrome 可执行文件
+2. 如果 Chrome 未在调试模式运行，会自动以 `--remote-debugging-port=9222` 启动
+3. 创建必要的符号链接，确保 Gateway 能正确连接
+4. 完成后可直接使用 `browser` 工具操作
+
+---
 
 ## 配置检查
 
@@ -119,8 +148,9 @@ keywords:
 **推荐使用 Kimi (kimi.com) 或 Gemini Web 进行搜索**，它们会基于 AI 整理搜索结果，比传统搜索引擎更高效。
 
 ```javascript
-// 1. 检查浏览器状态
-browser(action: "status", profile: "user")
+// 1. 智能启动 Chrome
+exec("opencli doctor --live")
+Start-Sleep -Seconds 3
 
 // 2. 打开 Kimi
 browser(action: "open", profile: "user", url: "https://kimi.com")
@@ -162,8 +192,9 @@ browser(action: "open", profile: "user", url: "https://gemini.google.com")
 如需使用百度/Bing/Google 等传统搜索引擎：
 
 ```javascript
-// 1. 检查浏览器状态
-browser(action: "status", profile: "user")
+// 1. 智能启动 Chrome
+exec("opencli doctor --live")
+Start-Sleep -Seconds 3
 
 // 2. 打开目标网站
 browser(action: "open", profile: "user", url: "https://example.com")
@@ -191,15 +222,19 @@ browser(action: "screenshot", profile: "user", fullPage: true)
 browser(action: "snapshot", profile: "user")
 ```
 
-### 流程 2：直接打开指定 URL
+### 流程 3：直接打开指定 URL
 
 ```javascript
-// 快速打开任意链接
+// 1. 智能启动 Chrome
+exec("opencli doctor --live")
+Start-Sleep -Seconds 3
+
+// 2. 快速打开任意链接
 browser(action: "open", profile: "user", url: "https://user-provided-url.com")
 browser(action: "snapshot", profile: "user")
 ```
 
-### 流程 3：检查浏览器状态
+### 流程 4：检查浏览器状态
 
 ```javascript
 // 列出所有标签页
@@ -209,9 +244,13 @@ browser(action: "tabs", profile: "user")
 browser(action: "status", profile: "user")
 ```
 
-### 流程 4：表单填写
+### 流程 5：表单填写
 
 ```javascript
+// 1. 智能启动 Chrome
+exec("opencli doctor --live")
+Start-Sleep -Seconds 3
+
 // 获取表单元素 ref
 browser(action: "snapshot", profile: "user")
 
@@ -221,7 +260,7 @@ browser(action: "act", profile: "user", request: {kind: "fill", ref: "1_11", tex
 browser(action: "act", profile: "user", request: {kind: "click", ref: "1_12"}) // 提交按钮
 ```
 
-### 流程 5：多标签页管理
+### 流程 6：多标签页管理
 
 ```javascript
 // 列出所有标签页
@@ -234,7 +273,7 @@ browser(action: "focus", profile: "user", targetId: "ABC123...")
 browser(action: "close", profile: "user", targetId: "DEF456...")
 ```
 
-### 流程 6：JavaScript 执行
+### 流程 7：JavaScript 执行
 
 ```javascript
 // 获取页面标题
@@ -247,7 +286,7 @@ browser(action: "act", profile: "user", request: {kind: "evaluate", fn: "() => w
 browser(action: "act", profile: "user", request: {kind: "evaluate", fn: "() => Array.from(document.querySelectorAll('a')).map(a => a.href)"})
 ```
 
-### 流程 7：页面监控（轮询检查）
+### 流程 8：页面监控（轮询检查）
 
 ```javascript
 // 监控特定元素变化
@@ -263,6 +302,12 @@ if ($current -ne $initial) {
 ```
 
 ## 故障排查
+
+### OpenCLI 不可用
+
+**症状**: `opencli: command not found` 或执行无响应
+
+**解决**: 使用传统启动方式（见附录）
 
 ### Gateway 超时
 
@@ -371,12 +416,13 @@ browser(action: "open", profile: "user", url: "https://example.com", timeoutMs: 
 
 ## 最佳实践
 
-1. **先检查状态** - 每次使用前确认浏览器连接正常
-2. **使用 snapshot 获取 ref** - 元素引用必须通过 snapshot 获取，且每次页面变化后需要重新获取
-3. **适当等待** - 操作后给页面加载时间 `Start-Sleep -Seconds 2`
-4. **处理登录** - 如需登录，让用户手动操作或确保 Cookie 已保存
-5. **截图确认** - 重要操作后截图确认结果
-6. **错误处理** - 操作失败时检查状态并重试
+1. **优先使用智能启动** - 通过 `opencli doctor --live` 自动启动 Chrome
+2. **先检查状态** - 每次使用前确认浏览器连接正常
+3. **使用 snapshot 获取 ref** - 元素引用必须通过 snapshot 获取，且每次页面变化后需要重新获取
+4. **适当等待** - 操作后给页面加载时间 `Start-Sleep -Seconds 2`
+5. **处理登录** - 如需登录，让用户手动操作或确保 Cookie 已保存
+6. **截图确认** - 重要操作后截图确认结果
+7. **错误处理** - 操作失败时检查状态并重试
 
 ## 限制
 
@@ -401,4 +447,41 @@ browser(action: "open", profile: "user", url: "https://example.com", timeoutMs: 
 
 ---
 
-*基于 OpenClaw 2026.3.13 Chrome Attach 模式*
+## 附录：传统启动方式
+
+当 OpenCLI 不可用时，使用以下 PowerShell 脚本手动启动 Chrome：
+
+```powershell
+# 1. 关闭所有 Chrome
+taskkill /F /IM chrome.exe 2>$null
+Start-Sleep -Seconds 3
+
+# 2. 用独立数据目录启动 Chrome（调试模式）
+$debugDir = "C:\Users\Administrator\ChromeDebug"
+New-Item -ItemType Directory -Force -Path $debugDir | Out-Null
+Start-Process "C:\Program Files\Google\Chrome\Application\chrome.exe" -ArgumentList "--remote-debugging-port=9222", "--user-data-dir=$debugDir"
+
+# 3. 等待启动
+Start-Sleep -Seconds 4
+
+# 4. 更新 SYSTEM 用户目录的符号链接（关键！）
+$systemDir = "C:\Windows\system32\config\systemprofile\AppData\Local\Google\Chrome\User Data"
+cmd /c "rmdir /s /q `"$systemDir`"" 2>$null
+cmd /c "mklink /J `"$systemDir`" `"$debugDir`""
+
+# 5. 验证 Chrome 调试端口
+Invoke-RestMethod -Uri "http://127.0.0.1:9222/json" -TimeoutSec 5
+
+# 6. 连接浏览器
+browser(action: "status", profile: "user")
+```
+
+**核心要点**：
+- **独立数据目录** `C:\Users\Administrator\ChromeDebug`（避免和用户日常 Chrome 冲突）
+- **符号链接** 必须创建，否则 SYSTEM 用户的 Gateway 找不到 Chrome
+- **验证 9222 端口** 再尝试 browser 工具
+
+---
+
+*基于 OpenClaw 2026.3.13 Chrome Attach 模式*  
+*版本 1.3.0 - 新增智能启动模式*
