@@ -1,69 +1,38 @@
 # Changelog
 
-所有版本的变更记录。
+## v2.0.0 (2026-03-24)
 
-格式基于 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)。
+### Breaking Changes
+- Streamlined from 488 lines to 181 lines (63% reduction)
+- Removed redundant PowerShell code examples (kept concise workflow descriptions)
+- Absorbed capabilities from deleted skills: agent-browser, playwright-mcp
 
-## [v1.2.0] - 2026-03-18
+### New Features
+- **Screenshot as core exclusive capability**: Explicitly declared as the only screenshot entry point
+- **Fallback chain**: agent-browser CLI and Playwright MCP documented as Gateway fallback options
+- **Traditional search engines**: Added Baidu/Bing/Google workflow
+- **JavaScript examples**: Scroll, get links, get title — 3 common use cases
+- **Limitations section**: 5 structured constraints documented
+- **Rate limiting troubleshooting**: Added to fault diagnosis table
+- **Full manual startup script**: Including SYSTEM user symlink creation for Windows services
 
-### Added
-- 添加语义化版本号到 SKILL.md 元数据
-- 扩展触发词列表，覆盖更多用户表达方式
-- 新增 4 个详细故障排查场景（Attach 失败、登录失效、截图问题、频率限制）
-- 新增 3 个实际使用案例（多标签页管理、JS 执行、页面监控）
-- 添加 triggers 和 keywords 元数据字段
+### Changes
+- `openclaw.json` configuration example added to skill
+- Trigger words optimized in YAML frontmatter
+- Coordination note with opencli-natural-commands added to description
 
-### Improved
-- 优化 SKILL.md 头部结构，符合 OpenClaw Skill 标准
-- 完善故障排查指南，添加预防性建议
-- 更新触发词表格，增加更多同义词
+## v1.3.0 (2026-03-23)
 
----
+- Added OpenCLI smart startup mode (`opencli doctor --live`)
 
-## [v1.1.0] - 2026-03-18
+## v1.2.0 (2026-03-18)
 
-### Added
-- 新增 Kimi (kimi.com) 搜索优先流程
-- 新增 Gemini Web (gemini.google.com) 搜索支持
-- AI 搜索结果自动整理能力
-- 8 个测试用例，覆盖率 100%
-- XSKILL 模式库：kimi-search-workflow
-- XSKILL 模式库：wait-for-ai-search
+- Improved trigger words, troubleshooting, use cases
 
-### Changed
-- 搜索方式从传统搜索引擎改为 AI 优先
-- 扩展触发场景，支持更自然的语言表达
-- 增加 AI 搜索专用等待时间（15s）
+## v1.1.0 (2026-03-18)
 
-### Fixed
-- 修正硬编码 ref 的示例，改为动态获取
-- 优化不同场景的等待时间配置
+- AI search priority: Kimi/Gemini Web support
 
-### Test Results
-- 通过率：100% (8/8)
-- 平均响应时间：12.4s
-- Kimi 搜索时间：28.5s
+## v1.0.0 (2026-03-18)
 
-## [v1.0.0] - 2026-03-18
-
-### Added
-- 初始版本：Chrome Attach 模式浏览器自动化
-- 基础操作：打开网页、点击、输入、截图
-- 4 个核心测试用例
-- 故障排查指南
-- 最佳实践文档
-
-### Test Results
-- 通过率：75% (3/4)
-- 平均响应时间：8.2s
-
----
-
-## 版本对比
-
-| 指标 | v1.0.0 | v1.1.0 | 变化 |
-|------|--------|--------|------|
-| 测试用例 | 4 | 8 | +4 |
-| 通过率 | 75% | 100% | +25% |
-| 搜索方式 | 传统搜索 | AI 搜索 | 升级 |
-| XSKILL 贡献 | 0 | 2 | +2 |
+- Initial release: basic browser control via OpenClaw Chrome Attach mode

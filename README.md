@@ -1,38 +1,43 @@
 # Chrome Browser Automation
 
-基于 OpenClaw 3.13+ Chrome Attach 模式的浏览器自动化 Skill。
+基于 OpenClaw Chrome Attach 模式的浏览器自动化 Skill。
 
 ## 功能特性
 
-- ✅ **AI 优先搜索** - 支持 Kimi、Gemini Web 智能搜索
-- ✅ **浏览器控制** - 打开网页、点击、输入、截图
-- ✅ **智能启动** - OpenCLI 自动检测并启动 Chrome，无需手动配置
-- ✅ **无需重复登录** - 复用 Chrome 已有登录态
-- ✅ **自然语言操作** - 像人一样描述需求
+- **截图核心能力** - `browser(action: "screenshot")` 是系统中网页截图的唯一入口
+- **AI 优先搜索** - 支持 Kimi、Gemini Web 智能搜索
+- **浏览器控制** - 打开网页、点击、输入、截图、JS 执行
+- **智能启动** - OpenCLI 自动检测并启动 Chrome，无需手动配置
+- **无需重复登录** - 复用 Chrome 已有登录态
+- **多层降级** - Gateway → agent-browser CLI → Playwright MCP
+
+## v2.0.0 新特性
+
+- **截图独占声明**：明确截图为本技能核心能力
+- **降级方案**：集成 agent-browser CLI 和 Playwright MCP 作为 Gateway 不可用时的备选
+- **传统搜索引擎**：新增百度/Bing/Google 工作流
+- **JS 执行示例**：滚动、获取链接、获取标题等常用场景
+- **限制列表**：明确 5 条结构化限制
+- **精简 63%**：从 488 行精简至 181 行，去除冗余代码示例
 
 ## 安装
 
-### 前提条件
-
-1. **安装 Chrome**
-2. **安装 OpenCLI**（用于智能启动）
-   ```bash
-   npm install -g @jackwener/opencli
-   ```
-3. **配置 OpenClaw**
-
-### 安装步骤
+### 一键安装（推荐）
 
 ```bash
-# 克隆仓库
+# 克隆到 OpenClaw skills 目录
+cd ~/.openclaw/workspace/skills/
 git clone https://github.com/zhangzeyu99-web/chrome-browser-automation.git
 
-# 复制到 OpenClaw skills 目录
-cp -r chrome-browser-automation ~/.openclaw/workspace/skills/
-
-# 重启 OpenClaw Gateway
+# 重启 Gateway
 openclaw gateway restart
 ```
+
+### 前置条件
+
+1. **Chrome 已安装**
+2. **OpenCLI 已安装**（用于智能启动）：`npm install -g @jackwener/opencli`
+3. **OpenClaw Gateway 运行中**
 
 ### 配置 OpenClaw
 
@@ -53,213 +58,86 @@ openclaw gateway restart
 }
 ```
 
-## 快速开始（智能启动模式）
+### 启动 Chrome
 
-### 方式 1：OpenCLI 自动启动（推荐）
+```bash
+# 方式 1：OpenCLI 自动启动（推荐）
+opencli doctor --live
 
-```javascript
-// 1. 自动检测并启动 Chrome
-exec("opencli doctor --live")
-
-// 2. 等待就绪
-Start-Sleep -Seconds 3
-
-// 3. 直接使用 browser 工具
-browser(action: "open", profile: "user", url: "https://kimi.com")
+# 方式 2：手动启动
+# Windows:
+# & "C:\Program Files\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9222
+# macOS:
+# /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222
+# Linux:
+# google-chrome --remote-debugging-port=9222
 ```
 
-**优势**：
-- ✅ 自动检测 Chrome 安装位置
-- ✅ 自动启动 Remote Debugging 模式
-- ✅ 自动处理 SYSTEM 用户符号链接
-- ✅ 无需手动 PowerShell 脚本
+### 验证
 
-### 方式 2：传统手动启动
-
-如 OpenCLI 不可用，使用传统方式：
-
-```powershell
-# 关闭所有 Chrome
-taskkill /F /IM chrome.exe 2>$null
-Start-Sleep -Seconds 3
-
-# 用独立数据目录启动 Chrome（调试模式）
-$debugDir = "C:\Users\Administrator\ChromeDebug"
-New-Item -ItemType Directory -Force -Path $debugDir | Out-Null
-Start-Process "C:\Program Files\Google\Chrome\Application\chrome.exe" `
-    -ArgumentList "--remote-debugging-port=9222", "--user-data-dir=$debugDir"
-
-# 等待启动
-Start-Sleep -Seconds 4
-
-# 更新 SYSTEM 用户目录的符号链接
-$systemDir = "C:\Windows\system32\config\systemprofile\AppData\Local\Google\Chrome\User Data"
-cmd /c "rmdir /s /q `"$systemDir`"" 2>$null
-cmd /c "mklink /J `"$systemDir`" `"$debugDir`""
-
-# 验证连接
+```javascript
 browser(action: "status", profile: "user")
 ```
 
 ## 使用示例
 
-### 搜索今天的新闻
-
-```javascript
-// 智能启动
-exec("opencli doctor --live")
-Start-Sleep -Seconds 3
-
-// 打开 Kimi
-browser(action: "open", profile: "user", url: "https://kimi.com")
-Start-Sleep -Seconds 2
-
-// 获取页面结构
-browser(action: "snapshot", profile: "user")
-
-// 点击搜索框（根据实际 ref 调整）
-browser(action: "act", profile: "user", request: {
-    kind: "click",
-    ref: "5_41"
-})
-
-// 输入搜索内容
-browser(action: "act", profile: "user", request: {
-    kind: "type",
-    ref: "5_41",
-    text: "今天的重要新闻"
-})
-
-// 提交搜索
-browser(action: "act", profile: "user", request: {
-    kind: "press",
-    key: "Enter"
-})
-
-// 等待结果
-Start-Sleep -Seconds 10
-
-// 截图保存结果
-browser(action: "screenshot", profile: "user", fullPage: true)
-```
-
 ### 截图当前页面
 
 ```javascript
-exec("opencli doctor --live")
-Start-Sleep -Seconds 3
 browser(action: "screenshot", profile: "user", fullPage: true)
 ```
 
-### 打开指定网站
+### 用 Kimi 搜索
 
 ```javascript
-exec("opencli doctor --live")
-Start-Sleep -Seconds 3
-browser(action: "open", profile: "user", url: "https://github.com")
+browser(action: "open", profile: "user", url: "https://kimi.com")
+// → snapshot → click 输入框 → type 问题 → press Enter → sleep 15s → screenshot
 ```
 
 ### 表单填写
 
 ```javascript
-exec("opencli doctor --live")
-Start-Sleep -Seconds 3
-
-// 获取表单元素 ref
 browser(action: "snapshot", profile: "user")
-
-// 填写多个字段
-browser(action: "act", profile: "user", request: {
-    kind: "fill",
-    ref: "1_10",
-    text: "用户名"
-})
-browser(action: "act", profile: "user", request: {
-    kind: "fill",
-    ref: "1_11",
-    text: "密码"
-})
-browser(action: "act", profile: "user", request: {
-    kind: "click",
-    ref: "1_12"  // 提交按钮
-})
+browser(action: "act", profile: "user", request: {kind: "fill", ref: "1_10", text: "用户名"})
+browser(action: "act", profile: "user", request: {kind: "fill", ref: "1_11", text: "密码"})
+browser(action: "act", profile: "user", request: {kind: "click", ref: "1_12"})
 ```
+
+## 与 opencli-natural-commands 的协调
+
+本技能与 [opencli-natural-commands](https://github.com/zhangzeyu99-web/opencli-natural-commands) 共享同一个 Chrome CDP 端口 (9222)，职责分工：
+
+| 任务 | 使用技能 |
+|------|---------|
+| 截图/AI搜索(Kimi/Gemini)/打开网页/表单 | **chrome-browser-automation** (本技能) |
+| B站/YouTube/Cursor/爬虫 | **opencli-natural-commands** |
+
+两者不得同时操作 Chrome，串行执行即可。
 
 ## 目录结构
 
 ```
 chrome-browser-automation/
-├── SKILL.md                    # 技能定义（主要文档）
+├── SKILL.md                    # 技能定义（主文档）
 ├── references/
 │   └── opencli-integration.md  # OpenCLI 集成指南
 ├── evals/                      # 测试用例
-│   └── evals.json
 ├── xskill/                     # 经验模式
-│   └── patterns/
 ├── auto-skill/                 # 自动化配置
-│   └── regression-tests.json
-├── CHANGELOG.md                # 变更日志
-└── README.md                   # 本文件
+├── CHANGELOG.md
+└── README.md
 ```
-
-## 完整能力清单
-
-### 基础操作
-
-| 能力 | 工具调用 |
-|------|----------|
-| 检查状态 | `browser(action: "status", profile: "user")` |
-| 列出标签页 | `browser(action: "tabs", profile: "user")` |
-| 打开网页 | `browser(action: "open", profile: "user", url: "...")` |
-| 页面快照 | `browser(action: "snapshot", profile: "user")` |
-| 截图 | `browser(action: "screenshot", profile: "user", fullPage: true)` |
-
-### 元素交互
-
-| 操作 | 工具调用 |
-|------|----------|
-| 点击 | `browser(action: "act", request: {kind: "click", ref: "1_2"})` |
-| 输入文字 | `browser(action: "act", request: {kind: "type", ref: "1_3", text: "..."})` |
-| 填写表单 | `browser(action: "act", request: {kind: "fill", ref: "1_4", text: "..."})` |
-| 按键 | `browser(action: "act", request: {kind: "press", key: "Enter"})` |
-
-### 高级操作
-
-| 能力 | 工具调用 |
-|------|----------|
-| 执行 JS | `browser(action: "act", request: {kind: "evaluate", fn: "() => document.title"})` |
-| 滚动页面 | `browser(action: "act", request: {kind: "evaluate", fn: "() => window.scrollTo(0, 500)"})` |
-| 调整窗口 | `browser(action: "act", request: {kind: "resize", width: 1920, height: 1080})` |
 
 ## 故障排查
 
-### OpenCLI 相关问题
-
-| 症状 | 解决方案 |
-|------|----------|
-| `opencli: command not found` | 安装 OpenCLI: `npm install -g @jackwener/opencli` |
-| `doctor --live` 卡住 | 手动关闭所有 Chrome 实例后重试 |
-
-### browser 工具相关问题
-
-| 症状 | 解决方案 |
-|------|----------|
-| `Could not connect to Chrome` | 重新执行 OpenCLI 或手动启动 |
-| `Navigation timeout` | 增加 timeoutMs 参数 |
-| `Element not found` | 重新获取 snapshot，ref 是动态生成的 |
+| 症状 | 解决 |
+|------|------|
+| Gateway 超时 | 重启 Gateway 服务 |
+| Chrome 连不上 | 确认以 `--remote-debugging-port=9222` 启动 |
+| ref 无效 | 重新 snapshot |
+| 截图空白 | 确保 Chrome 窗口可见 |
 
 详见 [SKILL.md](SKILL.md) 完整故障排查指南。
-
-## 版本历史
-
-- **v1.3.0** (2026-03-23) - 🚀 **新增 OpenCLI 智能启动模式**，简化启动流程
-- **v1.2.0** (2026-03-18) - 改进触发词、故障排查、使用案例
-- **v1.1.0** (2026-03-18) - AI 搜索优先，支持 Kimi/Gemini
-- **v1.0.0** (2026-03-18) - 初始版本，基础浏览器控制
-
-## 贡献
-
-欢迎提交 Issue 和 PR！
 
 ## License
 

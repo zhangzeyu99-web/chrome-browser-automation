@@ -1,98 +1,38 @@
 ---
 name: chrome-browser-automation
-version: 1.3.0
+version: 2.0.0
 description: |
-  使用 OpenClaw 的 Chrome Attach 模式自动化操作浏览器。
+  Chrome 浏览器自动化 — 截图、AI搜索、网页操作的唯一入口。
   
-  **搜索能力（优先使用 Kimi/Gemini Web）**:
-  - 用户需要搜索信息时，优先使用 Kimi (kimi.com) 或 Gemini Web (gemini.google.com)
-  - 相比传统搜索引擎，Kimi/Gemini 会基于 AI 整理搜索结果，更高效
-  - 触发词："搜索xx"、"查一下xx"、"用Kimi搜"、"问问Gemini"
+  **核心独占能力**: 网页截图（`browser(action: "screenshot")`）只能通过本技能完成。
   
-  **其他触发场景**:
-  - "打开xx网站"、"去xx看看"、"访问xx"
-  - "截图"、"截个图"、"网页截图"
-  - "看看Chrome开了什么"、"浏览器状态"
-  - 用户给出任意 URL 让打开
-  - 用户需要操作网页：点击、输入、填写表单
-  - 用户需要获取网页内容、监控页面变化
+  **触发场景**:
+  - 截图/截个图/网页截图/保存页面
+  - 搜索/查一下/用Kimi搜/问问Gemini
+  - 打开网站/去xx看看/访问xx/任意URL
+  - 点击/输入/填写/表单操作
+  - 看看Chrome开了什么/浏览器状态/标签页
+  - 网页监控/页面变化检测
   
-  **适用场景**: 任何需要浏览器自动化的任务，包括 AI 搜索、访问网站、填写表单、数据抓取、网页监控等。
-triggers:
-  - 搜索
-  - 查一下
-  - 看看
-  - 打开
-  - 访问
-  - 截图
-  - 浏览器
-  - Chrome
-  - Kimi
-  - Gemini
-  - 网页
-  - 标签页
-  - 点击
-  - 输入
-  - 填写
-  - 表单
-  - 网址
-  - http
-  - https
-  - .com
-  - .cn
-keywords:
-  - chrome automation
-  - browser control
-  - web scraping
-  - ai search
-  - kimi
-  - gemini
+  **不处理**: B站/bilibili/Cursor控制/爬虫 → 使用 opencli-natural-commands
+triggers: [截图, 搜索, 查一下, 打开, 访问, 浏览器, Chrome, Kimi, Gemini, 网页, 标签页, 点击, 输入, 填写, 表单, http, https]
+keywords: [chrome automation, browser control, screenshot, ai search, kimi, gemini]
 ---
 
 # Chrome 浏览器自动化
 
-基于 OpenClaw 3.13+ Chrome Attach 模式的浏览器自动化工具。
+基于 OpenClaw Chrome Attach 模式。**截图是本技能的核心独占能力。**
 
 ## 前置要求
 
-1. **Chrome 已安装** 并开启 Remote Debugging
-2. **OpenClaw Gateway 运行中** 且配置正确
-
-## 🚀 智能启动模式（推荐）
-
-通过 OpenCLI 自动检测并启动浏览器，无需手动配置：
-
-```javascript
-// 1. 使用 OpenCLI 自动检测并启动 Chrome
-exec("opencli doctor --live")
-
-// 2. 等待浏览器就绪
-Start-Sleep -Seconds 3
-
-// 3. 直接使用 browser 工具
-browser(action: "status", profile: "user")
-```
-
-**智能启动的优势**：
-- ✅ 自动检测 Chrome 安装位置
-- ✅ 自动启动 Remote Debugging 模式
-- ✅ 自动处理 SYSTEM 用户符号链接
-- ✅ 无需手动 PowerShell 脚本
-
-**工作原理**：
-1. `opencli doctor --live` 会检查系统环境，自动找到 Chrome 可执行文件
-2. 如果 Chrome 未在调试模式运行，会自动以 `--remote-debugging-port=9222` 启动
-3. 创建必要的符号链接，确保 Gateway 能正确连接
-4. 完成后可直接使用 `browser` 工具操作
-
----
+1. Chrome 已安装并以 `--remote-debugging-port=9222` 启动
+2. OpenClaw Gateway 运行中
 
 ## 配置检查
 
-每次使用前检查配置：
+确认 `~/.openclaw/openclaw.json` 中浏览器配置正确：
 
 ```json
-// ~/.openclaw/openclaw.json
 {
   "browser": {
     "enabled": true,
@@ -107,173 +47,82 @@ browser(action: "status", profile: "user")
 }
 ```
 
-## 完整能力清单
-
-### 基础操作
-
-| 能力 | 工具调用 | 说明 |
-|------|----------|------|
-| 检查状态 | `browser(action: "status", profile: "user")` | 确认 Chrome 连接正常 |
-| 列出标签页 | `browser(action: "tabs", profile: "user")` | 查看所有打开的页面 |
-| 打开网页 | `browser(action: "open", profile: "user", url: "...")` | 访问指定 URL |
-| 页面快照 | `browser(action: "snapshot", profile: "user")` | 获取页面 DOM 结构 |
-| 截图 | `browser(action: "screenshot", profile: "user", fullPage: true)` | 截取页面 |
-| 激活标签页 | `browser(action: "focus", profile: "user", targetId: "...")` | 切换到指定标签 |
-| 关闭标签页 | `browser(action: "close", profile: "user", targetId: "...")` | 关闭指定标签 |
-
-### 元素交互
-
-| 操作 | 工具调用 | 说明 |
-|------|----------|------|
-| 点击 | `browser(action: "act", profile: "user", request: {kind: "click", ref: "1_2"})` | 点击元素 |
-| 输入文字 | `browser(action: "act", profile: "user", request: {kind: "type", ref: "1_3", text: "..."})` | 在输入框打字 |
-| 填写表单 | `browser(action: "act", profile: "user", request: {kind: "fill", ref: "1_4", text: "..."})` | 填写表单字段 |
-| 按键 | `browser(action: "act", profile: "user", request: {kind: "press", key: "Enter"})` | 模拟键盘按键 |
-| 悬停 | `browser(action: "act", profile: "user", request: {kind: "hover", ref: "1_5"})` | 鼠标悬停 |
-| 选择 | `browser(action: "act", profile: "user", request: {kind: "select", ref: "1_6", values: ["option1"]})` | 下拉框选择 |
-
-### 高级操作
-
-| 能力 | 工具调用 | 说明 |
-|------|----------|------|
-| 执行 JS | `browser(action: "act", profile: "user", request: {kind: "evaluate", fn: "() => document.title"})` | 运行 JavaScript |
-| 滚动页面 | `browser(action: "act", profile: "user", request: {kind: "evaluate", fn: "() => window.scrollTo(0, 500)"})` | 滚动到指定位置 |
-| 调整窗口 | `browser(action: "act", profile: "user", request: {kind: "resize", width: 1920, height: 1080})` | 改变窗口大小 |
-| 等待加载 | `Start-Sleep -Seconds 3` | 等待页面/元素加载 |
-
-## 标准工作流程
-
-### 流程 1：使用 Kimi/Gemini 搜索（推荐）
-
-**推荐使用 Kimi (kimi.com) 或 Gemini Web 进行搜索**，它们会基于 AI 整理搜索结果，比传统搜索引擎更高效。
+## 启动 Chrome
 
 ```javascript
-// 1. 智能启动 Chrome
-exec("opencli doctor --live")
+exec("opencli doctor --live")   // 自动检测+启动 Chrome 调试模式
 Start-Sleep -Seconds 3
-
-// 2. 打开 Kimi
-browser(action: "open", profile: "user", url: "https://kimi.com")
-
-// 3. 等待页面加载（Kimi 需要登录，确保用户已登录）
-Start-Sleep -Seconds 2
-
-// 4. 获取页面 snapshot
-browser(action: "snapshot", profile: "user")
-
-// 5. 点击搜索/输入框（ref 根据实际页面确定）
-browser(action: "act", profile: "user", request: {kind: "click", ref: "5_41"})
-
-// 6. 输入搜索问题（用自然语言描述需求）
-browser(action: "act", profile: "user", request: {kind: "type", ref: "5_41", text: "今天有什么重要新闻"})
-
-// 7. 按回车提交
-browser(action: "act", profile: "user", request: {kind: "press", key: "Enter"})
-
-// 8. 等待 AI 搜索和整理结果（Kimi 需要较长时间）
-Start-Sleep -Seconds 15
-
-// 9. 截图获取结果
-browser(action: "screenshot", profile: "user", fullPage: true)
-
-// 10. 可选：获取页面文本内容
-browser(action: "snapshot", profile: "user")
-```
-
-**Gemini Web 替代方案**：
-```javascript
-// 使用 Gemini Web
-browser(action: "open", profile: "user", url: "https://gemini.google.com")
-// 后续步骤类似，根据页面结构调整 ref
-```
-
-### 流程 2：传统搜索引擎（备用）
-
-如需使用百度/Bing/Google 等传统搜索引擎：
-
-```javascript
-// 1. 智能启动 Chrome
-exec("opencli doctor --live")
-Start-Sleep -Seconds 3
-
-// 2. 打开目标网站
-browser(action: "open", profile: "user", url: "https://example.com")
-
-// 3. 等待页面加载
-Start-Sleep -Seconds 2
-
-// 4. 获取页面 snapshot（找到搜索框 ref）
-browser(action: "snapshot", profile: "user")
-
-// 5. 点击搜索框
-browser(action: "act", profile: "user", request: {kind: "click", ref: "1_32"})
-
-// 6. 输入搜索词
-browser(action: "act", profile: "user", request: {kind: "type", ref: "1_32", text: "搜索内容"})
-
-// 7. 按回车提交
-browser(action: "act", profile: "user", request: {kind: "press", key: "Enter"})
-
-// 8. 等待结果
-Start-Sleep -Seconds 3
-
-// 9. 截图或获取内容
-browser(action: "screenshot", profile: "user", fullPage: true)
-browser(action: "snapshot", profile: "user")
-```
-
-### 流程 3：直接打开指定 URL
-
-```javascript
-// 1. 智能启动 Chrome
-exec("opencli doctor --live")
-Start-Sleep -Seconds 3
-
-// 2. 快速打开任意链接
-browser(action: "open", profile: "user", url: "https://user-provided-url.com")
-browser(action: "snapshot", profile: "user")
-```
-
-### 流程 4：检查浏览器状态
-
-```javascript
-// 列出所有标签页
-browser(action: "tabs", profile: "user")
-
-// 查看详细状态
 browser(action: "status", profile: "user")
 ```
 
-### 流程 5：表单填写
-
-```javascript
-// 1. 智能启动 Chrome
-exec("opencli doctor --live")
+如果 opencli 不可用，手动启动（含 SYSTEM 用户符号链接）：
+```powershell
+taskkill /F /IM chrome.exe 2>$null
 Start-Sleep -Seconds 3
-
-// 获取表单元素 ref
-browser(action: "snapshot", profile: "user")
-
-// 填写多个字段
-browser(action: "act", profile: "user", request: {kind: "fill", ref: "1_10", text: "用户名"})
-browser(action: "act", profile: "user", request: {kind: "fill", ref: "1_11", text: "密码"})
-browser(action: "act", profile: "user", request: {kind: "click", ref: "1_12"}) // 提交按钮
+$debugDir = "$env:USERPROFILE\ChromeDebug"
+New-Item -ItemType Directory -Force -Path $debugDir | Out-Null
+Start-Process chrome.exe -ArgumentList "--remote-debugging-port=9222", "--user-data-dir=$debugDir"
+Start-Sleep -Seconds 4
+# SYSTEM 用户符号链接（Windows 服务场景需要）
+$systemDir = "C:\Windows\system32\config\systemprofile\AppData\Local\Google\Chrome\User Data"
+cmd /c "rmdir /s /q `"$systemDir`"" 2>$null
+cmd /c "mklink /J `"$systemDir`" `"$debugDir`""
+Invoke-RestMethod -Uri "http://127.0.0.1:9222/json" -TimeoutSec 5
 ```
 
-### 流程 6：多标签页管理
+## 能力速查
 
-```javascript
-// 列出所有标签页
-browser(action: "tabs", profile: "user")
+### 基础操作
 
-// 激活特定标签页（通过 targetId）
-browser(action: "focus", profile: "user", targetId: "ABC123...")
+| 能力 | 调用 |
+|------|------|
+| 检查状态 | `browser(action: "status", profile: "user")` |
+| 列出标签页 | `browser(action: "tabs", profile: "user")` |
+| 打开网页 | `browser(action: "open", profile: "user", url: "...")` |
+| 页面快照 | `browser(action: "snapshot", profile: "user")` |
+| **截图** | `browser(action: "screenshot", profile: "user", fullPage: true)` |
+| 激活标签页 | `browser(action: "focus", profile: "user", targetId: "...")` |
+| 关闭标签页 | `browser(action: "close", profile: "user", targetId: "...")` |
 
-// 关闭不需要的标签页
-browser(action: "close", profile: "user", targetId: "DEF456...")
+### 元素交互
+
+| 操作 | 调用 |
+|------|------|
+| 点击 | `browser(action: "act", profile: "user", request: {kind: "click", ref: "REF"})` |
+| 输入 | `browser(action: "act", profile: "user", request: {kind: "type", ref: "REF", text: "..."})` |
+| 填写 | `browser(action: "act", profile: "user", request: {kind: "fill", ref: "REF", text: "..."})` |
+| 按键 | `browser(action: "act", profile: "user", request: {kind: "press", key: "Enter"})` |
+| 悬停 | `browser(action: "act", profile: "user", request: {kind: "hover", ref: "REF"})` |
+| 选择 | `browser(action: "act", profile: "user", request: {kind: "select", ref: "REF", values: ["opt"]})` |
+| 执行JS | `browser(action: "act", profile: "user", request: {kind: "evaluate", fn: "() => ..."})` |
+
+## 典型工作流
+
+### AI 搜索（Kimi/Gemini）
+
+```
+browser(open) → kimi.com → snapshot → click 输入框 → type 问题 → press Enter → sleep 15s → screenshot
 ```
 
-### 流程 7：JavaScript 执行
+### 打开URL + 截图
+
+```
+browser(open) → URL → sleep 2s → screenshot(fullPage: true)
+```
+
+### 表单填写
+
+```
+browser(open) → URL → snapshot → fill 字段1 → fill 字段2 → click 提交
+```
+
+### 传统搜索引擎（百度/Bing/Google）
+
+```
+browser(open) → 搜索引擎URL → snapshot → click 搜索框 → type 关键词 → press Enter → sleep 3s → screenshot
+```
+
+### JavaScript 执行示例
 
 ```javascript
 // 获取页面标题
@@ -286,202 +135,66 @@ browser(action: "act", profile: "user", request: {kind: "evaluate", fn: "() => w
 browser(action: "act", profile: "user", request: {kind: "evaluate", fn: "() => Array.from(document.querySelectorAll('a')).map(a => a.href)"})
 ```
 
-### 流程 8：页面监控（轮询检查）
+### 页面监控
 
-```javascript
-// 监控特定元素变化
-$initial = browser(action: "snapshot", profile: "user")
-Start-Sleep -Seconds 30
-$current = browser(action: "snapshot", profile: "user")
-
-// 比较差异，检测变化
-if ($current -ne $initial) {
-    // 发送通知或截图
-    browser(action: "screenshot", profile: "user", fullPage: true)
-}
+```
+snapshot(初始) → sleep N → snapshot(当前) → 比较差异 → screenshot 如有变化
 ```
 
-## 故障排查
+## 降级方案
 
-### OpenCLI 不可用
+当 Gateway 不可用时，可用以下独立工具完成部分操作：
 
-**症状**: `opencli: command not found` 或执行无响应
+### agent-browser CLI（需 `npm install -g agent-browser`）
 
-**解决**: 使用传统启动方式（见附录）
-
-### Gateway 超时
-
-**症状**: `timed out. Restart the OpenClaw gateway`
-
-**解决**:
-```powershell
-schtasks /End /TN "OpenClaw"
-Start-Sleep -Seconds 3
-schtasks /Run /TN "OpenClaw"
+```bash
+agent-browser open <url>          # 导航
+agent-browser snapshot -i         # 获取可交互元素（ref 为 @e1 格式）
+agent-browser click @e1           # 点击
+agent-browser fill @e2 "text"     # 填写
+agent-browser screenshot path.png # 截图
+agent-browser close               # 关闭
 ```
 
-**预防**: 定期重启 Gateway，建议设置定时任务每周重启一次。
+### Playwright MCP（需 `npx @playwright/mcp`）
 
-### Chrome 未检测到
+| MCP 工具 | 说明 |
+|----------|------|
+| `browser_navigate` | 导航到 URL |
+| `browser_click` | 点击元素 |
+| `browser_type` | 输入文字 |
+| `browser_snapshot` | 获取页面结构 |
+| `browser_evaluate` | 执行 JavaScript |
+| `browser_get_text` | 获取文本内容 |
 
-**症状**: `Could not connect to Chrome`
+## 故障速查
 
-**检查**:
-1. Chrome 是否开启 Remote Debugging: `chrome://inspect/#remote-debugging`
-2. 端口是否与配置一致（默认 9222）
-3. OpenClaw 配置中的 `defaultProfile` 是否正确
-4. Chrome 是否以管理员权限运行
-
-**启动 Chrome with Remote Debugging**:
-```powershell
-# Windows
-& "C:\Program Files\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9222
-
-# Mac
-/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222
-
-# Linux
-google-chrome --remote-debugging-port=9222
-```
-
-### 页面加载超时
-
-**症状**: `Navigation timeout`
-
-**解决**:
-```javascript
-browser(action: "open", profile: "user", url: "https://example.com", timeoutMs: 30000)
-```
-
-**常见原因**:
-- 网络连接问题
-- 目标网站响应慢
-- 页面有重定向循环
-
-### 元素找不到
-
-**症状**: `Element not found` 或 ref 无效
-
-**解决**: 重新获取 snapshot，ref 是动态生成的
-
-**注意**: 
-- 每次页面刷新后 ref 都会变化
-- 不同网站的 ref 格式不同
-- 某些动态加载的元素需要等待后才能获取
-
-### Chrome Attach 被拒绝
-
-**症状**: `Failed to attach to Chrome: Connection refused`
-
-**原因**: Chrome 未开启远程调试或端口被占用
-
-**解决**:
-1. 关闭所有 Chrome 实例
-2. 使用命令行重新启动 Chrome（见上文）
-3. 检查端口 9222 是否被其他程序占用：`netstat -ano | findstr 9222`
-
-### Kimi/Gemini 登录失效
-
-**症状**: AI 搜索页面显示登录框或"请登录"
-
-**解决**:
-1. 让用户手动在 Chrome 中登录 Kimi/Gemini
-2. 勾选"保持登录状态"
-3. 如果 Cookie 过期，需要重新登录
-
-**提示**: 建议用户使用 Chrome 的密码管理器保存登录信息。
-
-### 截图失败或空白
-
-**症状**: 截图返回黑色或空白图片
-
-**原因**:
-- Chrome 窗口被最小化
-- 页面尚未完全加载
-- 显卡驱动问题
-
-**解决**:
-1. 确保 Chrome 窗口可见
-2. 增加等待时间后再截图
-3. 使用 `fullPage: true` 参数获取完整页面
-
-### 操作频繁被限制
-
-**症状**: 网站返回"操作过于频繁"或验证码
-
-**解决**:
-1. 增加操作间隔时间
-2. 使用 `Start-Sleep` 在操作间添加延迟
-3. 避免短时间内大量请求同一网站
+| 症状 | 解决 |
+|------|------|
+| Gateway 超时 | 重启 Gateway 服务 |
+| Chrome 连不上 | 确认 Chrome 以 `--remote-debugging-port=9222` 启动；确认符号链接已创建 |
+| ref 无效 | 重新 snapshot，ref 每次页面变化后会更新 |
+| 截图空白 | 确保 Chrome 窗口可见且页面已加载，增加等待时间后再截图 |
+| 登录失效 | 让用户在 Chrome 中手动重新登录 Kimi/Gemini，勾选保持登录 |
+| 端口被占 | `netstat -ano | findstr 9222`，kill 占用进程 |
+| 操作过频被限 | 增加操作间隔 `Start-Sleep`，避免短时间大量请求同一网站 |
+| 页面加载超时 | `browser(action: "open", url: "...", timeoutMs: 30000)` 增加超时 |
 
 ## 最佳实践
 
-1. **优先使用智能启动** - 通过 `opencli doctor --live` 自动启动 Chrome
-2. **先检查状态** - 每次使用前确认浏览器连接正常
-3. **使用 snapshot 获取 ref** - 元素引用必须通过 snapshot 获取，且每次页面变化后需要重新获取
-4. **适当等待** - 操作后给页面加载时间 `Start-Sleep -Seconds 2`
-5. **处理登录** - 如需登录，让用户手动操作或确保 Cookie 已保存
-6. **截图确认** - 重要操作后截图确认结果
-7. **错误处理** - 操作失败时检查状态并重试
+1. 每次操作前先 `browser(status)` 确认连接
+2. snapshot 获取 ref 后再交互，ref 是动态的
+3. 操作后 `Start-Sleep -Seconds 2` 等页面加载
+4. 重要操作后截图确认结果
 
 ## 限制
 
 - 只能操作已开启 Remote Debugging 的 Chrome 实例
 - 无法操作无痕模式窗口
-- 某些网站可能有反自动化检测
+- 某些网站有反自动化检测，可能需要增加等待和随机延迟
 - 需要用户保持 Chrome 运行
-- **Kimi/Gemini Web 需要用户已登录** - 首次使用需手动登录，后续复用 Cookie
+- Kimi/Gemini Web 需要用户已登录，首次使用需手动登录，后续复用 Cookie
 
-## 触发词参考
+## 参考
 
-用户可能用各种方式表达相同需求：
-
-| 意图 | 可能的表达 |
-|------|-----------|
-| **AI 搜索（优先）** | "用 Kimi 搜今天的新闻"、"问问 Gemini"、"查一下 xxx"、"搜索 xxx" |
-| 打开网站 | "打开百度"、"去知乎看看"、"访问 GitHub"、"打开 https://..." |
-| 传统搜索 | "在百度搜..."、"Google 一下"（备用方案） |
-| 截图 | "截图"、"截个图"、"网页截图"、"保存当前页面" |
-| 查看状态 | "看看 Chrome 开了什么"、"浏览器状态"、"当前标签页" |
-| 操作网页 | "点击登录按钮"、"填写用户名"、"在搜索框输入..." |
-
----
-
-## 附录：传统启动方式
-
-当 OpenCLI 不可用时，使用以下 PowerShell 脚本手动启动 Chrome：
-
-```powershell
-# 1. 关闭所有 Chrome
-taskkill /F /IM chrome.exe 2>$null
-Start-Sleep -Seconds 3
-
-# 2. 用独立数据目录启动 Chrome（调试模式）
-$debugDir = "C:\Users\Administrator\ChromeDebug"
-New-Item -ItemType Directory -Force -Path $debugDir | Out-Null
-Start-Process "C:\Program Files\Google\Chrome\Application\chrome.exe" -ArgumentList "--remote-debugging-port=9222", "--user-data-dir=$debugDir"
-
-# 3. 等待启动
-Start-Sleep -Seconds 4
-
-# 4. 更新 SYSTEM 用户目录的符号链接（关键！）
-$systemDir = "C:\Windows\system32\config\systemprofile\AppData\Local\Google\Chrome\User Data"
-cmd /c "rmdir /s /q `"$systemDir`"" 2>$null
-cmd /c "mklink /J `"$systemDir`" `"$debugDir`""
-
-# 5. 验证 Chrome 调试端口
-Invoke-RestMethod -Uri "http://127.0.0.1:9222/json" -TimeoutSec 5
-
-# 6. 连接浏览器
-browser(action: "status", profile: "user")
-```
-
-**核心要点**：
-- **独立数据目录** `C:\Users\Administrator\ChromeDebug`（避免和用户日常 Chrome 冲突）
-- **符号链接** 必须创建，否则 SYSTEM 用户的 Gateway 找不到 Chrome
-- **验证 9222 端口** 再尝试 browser 工具
-
----
-
-*基于 OpenClaw 2026.3.13 Chrome Attach 模式*  
-*版本 1.3.0 - 新增智能启动模式*
+- [OpenCLI 集成指南](references/opencli-integration.md)
