@@ -116,7 +116,7 @@ browser(open) → URL → sleep 2s → screenshot(fullPage: true)
 browser(open) → URL → snapshot → fill 字段1 → fill 字段2 → click 提交
 ```
 
-### 传统搜索引擎（百度/Bing/Google）
+### 传统搜索引擎（Bing/Google）
 
 ```
 browser(open) → 搜索引擎URL → snapshot → click 搜索框 → type 关键词 → press Enter → sleep 3s → screenshot

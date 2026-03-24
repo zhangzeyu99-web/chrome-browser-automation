@@ -10,7 +10,7 @@
 ### New Features
 - **Screenshot as core exclusive capability**: Explicitly declared as the only screenshot entry point
 - **Fallback chain**: agent-browser CLI and Playwright MCP documented as Gateway fallback options
-- **Traditional search engines**: Added Baidu/Bing/Google workflow
+- **Traditional search engines**: Added Bing/Google workflow
 - **JavaScript examples**: Scroll, get links, get title — 3 common use cases
 - **Limitations section**: 5 structured constraints documented
 - **Rate limiting troubleshooting**: Added to fault diagnosis table
